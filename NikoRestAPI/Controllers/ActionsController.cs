@@ -1,17 +1,21 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Net.ArcanaStudio.NikoSDK;
-using Net.ArcanaStudio.NikoSDK.Interfaces;
 using Net.ArcanaStudio.NikoSDK.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace NikoRestAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [EnableCors("MyPolicy")]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public class ActionsController : ControllerBase
     {
         private readonly NikoClient _nikoClient;
@@ -19,8 +23,6 @@ namespace NikoRestAPI.Controllers
         public ActionsController(INikoService service)
         {
             _nikoClient = service.Client;
-            _nikoClient.StartClient();
-            _nikoClient.StartEvents();
         }
 
 
@@ -31,10 +33,10 @@ namespace NikoRestAPI.Controllers
         {
             var actions = await _nikoClient.GetActions();
 
-            if (actions.Data.IsError)
+            if (actions.IsError)
                 return  new StatusCodeResult(StatusCodes.Status500InternalServerError);
 
-            return Ok(actions.Data.Actions);
+            return Ok(actions.Data);
         }
 
         // GET: api/Actions/5
@@ -43,27 +45,21 @@ namespace NikoRestAPI.Controllers
         {
             var actions = await _nikoClient.GetActions();
 
-            if (actions.Data.IsError)
+            if (actions.IsError)
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
 
-            return Ok(actions.Data.Actions.FirstOrDefault(d => d.Id == id));
+            return Ok(actions.Data.FirstOrDefault(d => d.Id == id));
         }
-
+        
         // POST: api/Actions
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Action value)
+        public async Task<IActionResult> Post([FromBody] ExecuteAction value)
         {
-            var response = await _nikoClient.ExecuteCommand(value.Id,value.Value);
+            var response = await _nikoClient.ExecuteCommand(value.Id, value.Value);
 
-            if (response.Data.IsError)
+            if (response.IsError)
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-            _nikoClient.OnValueChanged += NikoClientOnOnValueChanged;
             return Ok(response);
-        }
-
-        private void NikoClientOnOnValueChanged(object sender, IEvent e)
-        {
-         
         }
     }
 }

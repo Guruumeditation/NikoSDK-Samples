@@ -26,5 +26,5 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- script: dotnet build --configuration $(buildConfiguration)
+- script: dotnet build NikoRestAPI/NikoRestAPI.csproj --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
