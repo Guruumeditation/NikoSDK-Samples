@@ -13,8 +13,6 @@ namespace NikoRestAPI.Controllers
         public SystemController(INikoService service)
         {
             _nikoClient = service.Client;
-            _nikoClient.StartClient();
-            _nikoClient.StartEvents();
         }
 
         // GET: api/System
@@ -23,7 +21,7 @@ namespace NikoRestAPI.Controllers
         {
             var si = await _nikoClient.GetSystemInfo();
 
-            if (si.Data.IsError)
+            if (si.IsError)
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
 
             return Ok(si.Data);

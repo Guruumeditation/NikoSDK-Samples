@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NikoRestAPI.Hubs;
 
 namespace NikoRestAPI
 {
@@ -23,7 +24,9 @@ namespace NikoRestAPI
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddSingleton<INikoService>(new NikoService());
+            services.AddSignalR();
+
+            services.AddSingleton<INikoService,NikoService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,6 +44,8 @@ namespace NikoRestAPI
             app.UseCors("MyPolicy");
 
             app.UseHttpsRedirection();
+            app.UseSignalR(routes => routes.MapHub<NikoEventHub>("/NikoEventHub"));
+
             app.UseMvc();
         }
     }

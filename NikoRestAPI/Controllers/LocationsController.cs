@@ -15,8 +15,6 @@ namespace NikoRestAPI.Controllers
         public LocationsController(INikoService service)
         {
             _nikoClient = service.Client;
-            _nikoClient.StartClient();
-            _nikoClient.StartEvents();
         }
 
 
@@ -26,10 +24,10 @@ namespace NikoRestAPI.Controllers
         {
             var locationq = await _nikoClient.GetLocations();
 
-            if (locationq.Data.IsError)
+            if (locationq.IsError)
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
 
-            return Ok(locationq.Data.Locations);
+            return Ok(locationq.Data);
         }
 
         // GET: api/Locations/5
@@ -38,10 +36,10 @@ namespace NikoRestAPI.Controllers
         {
             var locations = await _nikoClient.GetLocations();
 
-            if (locations.Data.IsError)
+            if (locations.IsError)
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
 
-            return Ok(locations.Data.Locations.FirstOrDefault(d => d.Id == id));
+            return Ok(locations.Data.FirstOrDefault(d => d.Id == id));
         }
     }
 }
